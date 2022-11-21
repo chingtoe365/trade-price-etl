@@ -1,0 +1,25 @@
+networks:
+  service-net:
+    name: ${INTERNAL_NETWORK}
+    external: true
+
+services:
+
+  etl:
+    image: ${IMAGE}
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+      args:
+        CONDA_ENV_FILE: environment.yml
+    command: sleep 5000
+    networks:
+      - service-net
+
+  mongodb:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    networks:
+      - service-net

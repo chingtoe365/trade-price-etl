@@ -1,0 +1,10 @@
+name: trade-price-etl
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.8.*
+  - selenium=4.6.0
+  # dev
+  - pytest=7.2.*
+  - watchgod=0.7

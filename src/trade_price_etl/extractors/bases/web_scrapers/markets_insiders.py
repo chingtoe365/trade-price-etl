@@ -1,6 +1,7 @@
 import datetime
 import logging
 import re
+import time
 from typing import List
 from urllib.parse import urljoin
 
@@ -26,7 +27,7 @@ class PresenceOfAnyElements(object):
 
     def __call__(self, driver):
         element = driver.find_element(*self.locator)  # Finding the referenced element
-        if any([cls in element.get_attribute("class") for cls in self.css_classes]):
+        if all([cls in element.get_attribute("class") for cls in self.css_classes]):
             return element
         else:
             return False
@@ -35,7 +36,8 @@ class PresenceOfAnyElements(object):
 class MarketsInsiderScraperBase:
     _base_url = 'https://markets.businessinsider.com/'
     _target_span_class_name = "price-section__current-value"
-    _max_wait_time = 5
+    _max_wait_time = 100
+    _poll_frequency = 0.01
 
     def __init__(self, dir_url, price_name):
         self._dir_url = dir_url
@@ -43,28 +45,41 @@ class MarketsInsiderScraperBase:
 
     def extract(self):
         with SeleniumDriver(service_args=['--ignore-ssl-errors=true']) as driver:
-            wait = WebDriverWait(driver, self._max_wait_time)
+            wait = WebDriverWait(
+                driver,
+                timeout=self._max_wait_time,
+                poll_frequency=self._poll_frequency
+            )
+            last_price = 0
+            driver = self._browse_site(driver)
             while True:
-                obtained_price = self._browse_site(driver)
+                obtained_price = self._scrape_price(driver)
+                if obtained_price == last_price:
+                    time.sleep(0.5)
+                    continue
                 logger.warning('Time: {}, Price: ${}'.format(
-                    datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%M-%d %h:%m:%s'),
+                    datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%M-%d %H:%m:%s'),
                     str(obtained_price)
                 ))
-                wait.until(
-                    PresenceOfAnyElements(
-                        (By.CLASS_NAME, self._target_span_class_name),
-                        [
-                            'price-section__current-value--negative-updated',
-                            'price-section__current-value--positive-updated'
-                        ]
-                    )
-
-                )
+                last_price = obtained_price
+                # wait.until(
+                #     PresenceOfAnyElements(
+                #         (By.CLASS_NAME, self._target_span_class_name),
+                #         [
+                #             'price-section__current-value--negative-updated',
+                #             'price-section__current-value--positive-updated'
+                #         ]
+                #     )
+                #
+                # )
 
     def _browse_site(self, driver: webdriver) -> float:
         full_url = urljoin(self._base_url, self._dir_url)
         driver.get(full_url)
-        js_script = "return document.querySelector('.{}', ':after').innerHTML".format(
+        return driver
+
+    def _scrape_price(self, driver: webdriver):
+        js_script = "return document.querySelector('.{}').innerHTML".format(
             self._target_span_class_name
         )
         price_span = driver.execute_script(js_script)

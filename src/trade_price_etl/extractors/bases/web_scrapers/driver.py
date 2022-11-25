@@ -8,7 +8,7 @@ class SeleniumDriver(ContextDecorator):
     driver = None
 
     def __init__(
-        self, chrome_options=None, set_headless=True, *args, **kwargs
+        self, chrome_options=None, *args, **kwargs
     ):
         '''
         initialize Chrome webdriver
@@ -16,17 +16,19 @@ class SeleniumDriver(ContextDecorator):
         self._chrome_options = chrome_options or Options()
         self._args = args
         self._kwargs = kwargs
-        self.set_headless = set_headless
 
     def _get_desired_capabilities(self):
         return {}
 
-    def __enter__(self) -> webdriver:
+    def __enter__(self, headless=True) -> webdriver:
         '''
         Opens and returns the driver
         '''
-        if self.set_headless:
-            self._chrome_options.set_headless()
+        # if self.set_headless:
+        #     self._chrome_options.set_headless()
+        if headless:
+            self._chrome_options.headless = headless
+
         self.driver = webdriver.Chrome(
             chrome_options=self._chrome_options,
             **self._kwargs

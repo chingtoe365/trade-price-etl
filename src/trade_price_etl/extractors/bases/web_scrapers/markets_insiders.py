@@ -4,6 +4,7 @@ import re
 from typing import List
 from urllib.parse import urljoin
 
+from selenium.webdriver.chrome import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -34,9 +35,9 @@ class PresenceOfAnyElements(object):
 class MarketsInsiderScraperBase:
     _base_url = 'https://markets.businessinsider.com/'
     _target_span_class_name = "price-section__current-value"
-    _max_wait_time = 100
+    _max_wait_time = 5
 
-    def __int__(self, dir_url, price_name):
+    def __init__(self, dir_url, price_name):
         self._dir_url = dir_url
         self._price_name = price_name
 
@@ -45,7 +46,7 @@ class MarketsInsiderScraperBase:
             wait = WebDriverWait(driver, self._max_wait_time)
             while True:
                 obtained_price = self._browse_site(driver)
-                logger.info('Time: {}, Price: ${}'.format(
+                logger.warning('Time: {}, Price: ${}'.format(
                     datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%M-%d %h:%m:%s'),
                     str(obtained_price)
                 ))
@@ -60,15 +61,14 @@ class MarketsInsiderScraperBase:
 
                 )
 
-    def _browse_site(self, driver: SeleniumDriver) -> float:
+    def _browse_site(self, driver: webdriver) -> float:
         full_url = urljoin(self._base_url, self._dir_url)
         driver.get(full_url)
-        price_span = driver.find_elements_by_xpath(
-            '//span[contains(@class, {})]'.format(self._target_span_class_name)
+        js_script = "return document.querySelector('.{}', ':after').innerHTML".format(
+            self._target_span_class_name
         )
-        price_content = price_span.get_attribute('innerHTML')
-        price_match_result = re.search(r'"(\d+\.\d+)"', price_content)
-        if not price_match_result:
-            logger.error('Failed to obtain price for ', self._price_name)
-        price = float(price_match_result.group(1))
+        price_span = driver.execute_script(js_script)
+        price = float(price_span.replace(',', ''))
+        if not price_span:
+            logger.error('Failed to obtain price for %s', self._price_name)
         return price

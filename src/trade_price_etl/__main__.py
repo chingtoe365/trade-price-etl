@@ -7,13 +7,13 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    btc_extractor = MarketsInsiderScraperBase(
-        'currencies/btc-usd',
-        'bitcoin'
-    )
-    btc_extractor.extract()
-    # btc_extractor = TradingEconomicsScraperBase('crypto', 'Bitcoin', 0)
+    # btc_extractor = MarketsInsiderScraperBase(
+    #     'currencies/btc-usd',
+    #     'bitcoin'
+    # )
     # btc_extractor.extract()
+    btc_extractor = TradingEconomicsScraperBase('crypto', 0, 'Crypto')
+    btc_extractor.extract()
 
 main()
 

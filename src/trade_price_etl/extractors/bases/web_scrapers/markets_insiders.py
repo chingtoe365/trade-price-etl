@@ -36,8 +36,8 @@ class PresenceOfAnyElements(object):
 class MarketsInsiderScraperBase:
     _base_url = 'https://markets.businessinsider.com/'
     _target_span_class_name = "price-section__current-value"
-    _max_wait_time = 100
-    _poll_frequency = 0.01
+    # _max_wait_time = 100
+    _poll_frequency = 0.2
 
     def __init__(self, dir_url, price_name):
         self._dir_url = dir_url
@@ -45,20 +45,23 @@ class MarketsInsiderScraperBase:
 
     def extract(self):
         with SeleniumDriver(service_args=['--ignore-ssl-errors=true']) as driver:
-            wait = WebDriverWait(
-                driver,
-                timeout=self._max_wait_time,
-                poll_frequency=self._poll_frequency
-            )
+            # wait = WebDriverWait(
+            #     driver,
+            #     timeout=self._max_wait_time,
+            #     poll_frequency=self._poll_frequency
+            # )
             last_price = 0
             driver = self._browse_site(driver)
+            # obtain and drop first price which always is the price before DOM applies
+            _ = self._scrape_price(driver)
             while True:
                 obtained_price = self._scrape_price(driver)
                 if obtained_price == last_price:
-                    time.sleep(0.5)
+                    time.sleep(self._poll_frequency)
                     continue
-                logger.warning('Time: {}, Price: ${}'.format(
-                    datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%M-%d %H:%m:%s'),
+                logger.warning('Time: {}, {} Price: ${}'.format(
+                    datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%d %H:%M:%S'),
+                    self._price_name.capitalize(),
                     str(obtained_price)
                 ))
                 last_price = obtained_price

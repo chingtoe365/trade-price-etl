@@ -2,6 +2,10 @@ FROM conda/miniconda3
 
 COPY ./${CONDA_ENV_FILE}.yml /environment.yml
 
+# # install chrome & chromedriver
+# RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
+#     && yum localinstall google-chrome-stable_current_x86_64.rpm
+
 RUN echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf \
     && echo "Acquire::http::Pipeline-Depth 0;" >> /etc/apt/apt.conf \
     && apt-get update && apt-get -y upgrade && apt-get -y install git libxrender1 libxext6 build-essential  \

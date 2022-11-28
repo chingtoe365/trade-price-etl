@@ -6,14 +6,13 @@ from trade_price_etl.extractors.bases.web_scrapers.trading_economics import Trad
 logger = logging.getLogger(__name__)
 
 
+def streamline_extractors():
+    crypto_extractor = TradingEconomicsScraperBase('crypto', 0, 'Crypto')
+    crypto_extractor.extract()
+
+
 def main():
-    # btc_extractor = MarketsInsiderScraperBase(
-    #     'currencies/btc-usd',
-    #     'bitcoin'
-    # )
-    # btc_extractor.extract()
-    btc_extractor = TradingEconomicsScraperBase('crypto', 0, 'Crypto')
-    btc_extractor.extract()
+    streamline_extractors()
+
 
 main()
-

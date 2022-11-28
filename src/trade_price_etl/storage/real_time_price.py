@@ -2,6 +2,7 @@ from collections import deque
 
 from typing import Dict
 
+import pandas as pd
 
 queue_max_size = 100000
 
@@ -25,6 +26,14 @@ class RealTimePriceStorage:
             self._full_dict[price_name] = {}
             self._full_dict[price_name]['timestamp'] = deque([ts], maxlen=queue_max_size)
             self._full_dict[price_name]['price'] = deque([price], maxlen=queue_max_size)
+
+    def get_data(self):
+        out_dict = {}
+        for k, v in self._full_dict.items():
+            out_dict[k] = pd.DataFrame(
+                {'timestamp': list(v.get('timestamp')), 'price': list(v.get('price'))}
+            )
+        return out_dict
 
 
 RTS = RealTimePriceStorage()

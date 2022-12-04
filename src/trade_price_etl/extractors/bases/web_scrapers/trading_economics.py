@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 import time
@@ -24,7 +25,7 @@ class TradingEconomicsScraperBase:
         self._target_table_idx = target_table_index
         self._name_col = name_column
 
-    def extract(self):
+    async def extract(self):
         full_url = urljoin(self._url_base, self._url_dir)
         with SeleniumDriver(service_args=['--ignore-ssl-errors=true']) as driver:
             driver.get(full_url)
@@ -42,7 +43,7 @@ class TradingEconomicsScraperBase:
                     if new_price != old_price:
                         # store in storage
                         RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
-                        logger.warning('%s Price: $%s', price_name, new_price)
+                        # logger.warning('%s Price: $%s', price_name, new_price)
 
                 df_old = df
-                time.sleep(self._poll_frequency)
+                await asyncio.sleep(self._poll_frequency)

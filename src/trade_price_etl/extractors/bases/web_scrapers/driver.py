@@ -29,6 +29,8 @@ class SeleniumDriver(ContextDecorator):
         if headless:
             self._chrome_options.headless = headless
 
+        self._chrome_options.add_argument('--no-sandbox')
+
         self.driver = webdriver.Chrome(
             chrome_options=self._chrome_options,
             **self._kwargs

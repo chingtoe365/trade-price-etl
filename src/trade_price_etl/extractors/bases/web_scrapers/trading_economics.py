@@ -43,7 +43,7 @@ class TradingEconomicsScraperBase:
                     if new_price != old_price:
                         # store in storage
                         RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
-                        # logger.warning('%s Price: $%s', price_name, new_price)
+                        logger.warning('%s Price: $%s', price_name, new_price)
 
                 df_old = df
                 await asyncio.sleep(self._poll_frequency)

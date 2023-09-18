@@ -1,5 +1,11 @@
-FROM condaforge/mambaforge:4.14.0-0 as mambaforge
-FROM selenium/standalone-chrome:116.0.5845.187
+FROM --platform=linux/amd64 condaforge/mambaforge:4.14.0-0 as mambaforge
+FROM --platform=linux/amd64 selenium/standalone-chrome:116.0.5845.187
+
+# setup proxies if needed
+ARG HTTP_PROXY=$HTTP_PROXY
+ARG HTTPS_PROXY=$HTTPS_PROXY
+ENV http_proxy=$HTTP_PROXY
+ENV https_proxy=$HTTPS_PROXY
 
 ARG CONDA_ENV_FILE=$CONDA_ENV_FILE
 COPY ./$CONDA_ENV_FILE /environment.yml
@@ -15,6 +21,7 @@ RUN mamba update --yes -n base mamba \
     && mamba clean --all --yes
 
 COPY ./src /app
+#COPY ./docker/.env /app/trade_price_etl/.env
 COPY ./docker/scripts/start.sh /start.sh
 RUN sudo chmod +x /start.sh
 # set paths

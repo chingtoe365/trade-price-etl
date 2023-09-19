@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 
 from trade_price_etl.extractors.bases.web_scrapers.driver import SeleniumDriver
 from trade_price_etl.storage.real_time_price import RTS
+from trade_price_etl.notifications.publisher import publich_message, connect_mqtt, publish
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,8 @@ class TradingEconomicsScraperBase:
 
     async def extract(self):
         full_url = urljoin(self._url_base, self._url_dir)
+        client = connect_mqtt()
+        client.loop_start()
         with SeleniumDriver(service_args=['--ignore-ssl-errors=true']) as driver:
             driver.get(full_url)
             full_html = driver.page_source
@@ -43,7 +46,11 @@ class TradingEconomicsScraperBase:
                     if new_price != old_price:
                         # store in storage
                         RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
-                        logger.warning('%s Price: $%s', price_name, new_price)
+                        msg = '%s Price: $%s' % (price_name, new_price)
+                        logger.warning('publish new message to topic: ' + price_name + '; message: ' + msg)
+                        # publish this message to mosquitto
+                        publish(client, price_name, msg)
+
 
                 df_old = df
                 await asyncio.sleep(self._poll_frequency)

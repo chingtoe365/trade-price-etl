@@ -1,6 +1,5 @@
 
 services:
-
   etl:
     image: ${IMAGE}
     build:
@@ -9,6 +8,8 @@ services:
       args:
         CONDA_ENV_FILE: environment.yml
     command: sleep 5000
+    volumes:
+      - ./src:/app/src
     networks:
       - service-net
 
@@ -21,8 +22,38 @@ services:
     networks:
       - service-net
 
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    user: mosquitto
+    volumes:
+    - type: bind
+      source: ./config/
+      target: /mosquitto/config/
+      read_only: false
+    - type: bind
+      source: ./log/
+      target: /mosquitto/log/
+      read_only: false
+    - type: volume
+      source: mqtt-broker-data
+      target: /mosquitto/data/
+    ports:
+    - target: 1883
+      published: 1883
+      protocol: tcp
+      mode: host
+    - target: 9001
+      published: 9001
+      protocol: tcp
+      mode: host
+    networks:
+      - service-net
 
 networks:
   service-net:
     name: ${INTERNAL_NETWORK}
 #    external: true
+
+volumes:
+   mqtt-broker-data:
+       name: "mqtt-broker-data2"

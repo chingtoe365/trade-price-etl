@@ -7,5 +7,6 @@ dependencies:
   - selenium=4.6.0
   - pandas=1.5.1
   - lxml=4.9.1
+  - paho-mqtt=1.6.1
   - pytest=7.2.*
   - watchgod=0.7

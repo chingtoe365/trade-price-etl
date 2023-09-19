@@ -53,7 +53,7 @@ class SeleniumDriver(ContextDecorator):
         could be timeouted by its parent, this could cause the exit to
         not be called.
         """
-        """ 
+        """
             !Remember __del__ and circular references are enemies
         """
         if self.driver:

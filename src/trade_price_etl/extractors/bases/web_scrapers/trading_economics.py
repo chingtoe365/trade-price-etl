@@ -28,8 +28,6 @@ class TradingEconomicsScraperBase:
 
     async def extract(self):
         full_url = urljoin(self._url_base, self._url_dir)
-        client = connect_mqtt()
-        client.loop_start()
         with SeleniumDriver(service_args=['--ignore-ssl-errors=true']) as driver:
             driver.get(full_url)
             full_html = driver.page_source
@@ -48,8 +46,6 @@ class TradingEconomicsScraperBase:
                         RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
                         msg = '%s Price: $%s' % (price_name, new_price)
                         logger.warning('publish new message to topic: ' + price_name + '; message: ' + msg)
-                        # publish this message to mosquitto
-                        publish(client, price_name, msg)
 
 
                 df_old = df

@@ -4,10 +4,3 @@ channels:
   - conda-forge
 dependencies:
   - python=3.8.*
-  - selenium=4.6.0
-  - pandas=1.5.1
-  - lxml=4.9.1
-  - pydantic-settings=2.0.2
-  - pydantic=2.0.3
-  # message broker
-  - paho-mqtt=1.6.1

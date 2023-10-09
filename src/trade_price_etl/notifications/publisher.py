@@ -5,7 +5,7 @@ import sys
 # pip3 install paho-mqtt
 from paho.mqtt import client as mqtt_client
 
-from trade_price_etl.settings.settings import settings
+from trade_price_etl.settings.base_settings import settings
 
 broker = 'host.docker.internal'
 port = 1883

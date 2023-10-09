@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from multiprocessing import Pool
 
 from trade_price_etl.calculators.sig_doube_peg import DoublePegSignal
@@ -33,7 +34,7 @@ async def streamline_calculators():
 
 async def run_pipelines():
     await streamline_extractors()
-    await streamline_calculators()
+    # await streamline_calculators()
     while True:
         await asyncio.sleep(0.5)
         RTMS.flag()
@@ -43,4 +44,4 @@ def main():
     asyncio.run(run_pipelines())
 
 
-main()
+sys.exit(main())

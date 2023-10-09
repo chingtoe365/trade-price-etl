@@ -7,6 +7,7 @@ import pandas as pd
 from urllib.parse import urljoin
 
 from trade_price_etl.extractors.bases.web_scrapers.driver import SeleniumDriver
+from trade_price_etl.settings.base_settings import settings
 from trade_price_etl.storage.real_time_price import RTS
 from trade_price_etl.notifications.publisher import publich_message, connect_mqtt, publish
 
@@ -28,12 +29,15 @@ class TradingEconomicsScraperBase:
 
     async def extract(self):
         full_url = urljoin(self._url_base, self._url_dir)
+        logger.info(settings.model_dump())
+        # print("ok")
         with SeleniumDriver(service_args=['--ignore-ssl-errors=true']) as driver:
             driver.get(full_url)
             full_html = driver.page_source
             dfs = pd.read_html(full_html)
             df_old = dfs[self._target_table_idx]
             while True:
+                driver.get(full_url)
                 full_html = driver.page_source
                 dfs = pd.read_html(full_html)
                 df = dfs[self._target_table_idx]
@@ -42,11 +46,11 @@ class TradingEconomicsScraperBase:
                     new_price = df['Price'][i]
                     old_price = df_old['Price'][i]
                     if new_price != old_price:
+                        logger.debug(f'>> {price_name} \n old: {old_price} \n new: {new_price}')
                         # store in storage
                         RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
-                        msg = '%s Price: $%s' % (price_name, new_price)
-                        logger.warning('publish new message to topic: ' + price_name + '; message: ' + msg)
+                        # msg = '%s Price: $%s' % (price_name, new_price)
+                        # logger.warning('publish new message to topic: ' + price_name + '; message: ' + msg)
 
-
-                df_old = df
+                df_old = df.copy()
                 await asyncio.sleep(self._poll_frequency)

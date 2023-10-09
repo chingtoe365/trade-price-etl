@@ -13,6 +13,8 @@ services:
 #    command: ["watchgod", "trade_price_etl.main"]
 #    command: ["sleep", "5000"]
     command: /start.sh DEBUG
+    volumes:
+      - ../src/:/app
 
   mqtt-broker:
 #    <<: *user

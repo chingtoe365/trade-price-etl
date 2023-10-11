@@ -10,10 +10,18 @@ from trade_price_etl.storage.real_time_metric import RTMS
 from trade_price_etl.storage.real_time_price import RTS
 
 logger = logging.getLogger(__name__)
-COMPUTE_FREQUENCY = 0.5
+COMPUTE_FREQUENCY = 3
 METRICS = {
     'double_peg': DoublePegSignal
 }
+
+
+# def mp_debug(a, b, *args, **kwargs):
+def mp_debug(a, b):
+    logger.debug(f">> Calling this function in multiple processors")
+    logger.debug(f">> A: {a}")
+    logger.debug(f">> B: {b}")
+    # logger.debug(f">> Args: {args}")
 
 
 async def streamline_extractors():
@@ -22,22 +30,33 @@ async def streamline_extractors():
 
 
 async def streamline_calculators():
-    client = connect_mqtt()
-    client.loop_start()
-    with Pool(processes=16) as p:
+    logger.debug(f">> Live calculator is on")
+    with Pool(processes=1) as p:
         while True:
             await asyncio.sleep(COMPUTE_FREQUENCY)
             all_price_dfs = RTS.get_data()
-            for _, klass in METRICS.items():
-                p.map(klass.compute, ((price, all_price_dfs[price]) for price in all_price_dfs))
+            # logger.debug(f">> All price dataframes: {all_price_dfs}")
+            if all_price_dfs:
+                # logger.debug(f"Some data has been stored")
+                for metric, klass in METRICS.items():
+                    # logger.debug(f"Metric to assign tasks: {metric}")
+                    p.starmap(
+                        klass.compute,
+                        [
+                            (price, all_price_dfs[price]) for price in all_price_dfs
+                        ]
+                    )
+                    # logger.debug(f"Multiprocessing jobs assignment completed")
 
 
 async def run_pipelines():
-    await streamline_extractors()
-    # await streamline_calculators()
-    while True:
-        await asyncio.sleep(0.5)
-        RTMS.flag()
+    extract_task = asyncio.create_task(streamline_extractors())
+    calculate_task = asyncio.create_task(streamline_calculators())
+    await extract_task
+    await calculate_task
+    # while True:
+    #     await asyncio.sleep(0.5)
+    #     RTMS.flag()
 
 
 def main():

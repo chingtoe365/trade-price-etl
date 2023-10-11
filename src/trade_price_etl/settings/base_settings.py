@@ -28,3 +28,4 @@ class EtlSettings(BaseSettings, case_sensitive=True):
 
 
 settings = EtlSettings()
+logger.debug(settings)

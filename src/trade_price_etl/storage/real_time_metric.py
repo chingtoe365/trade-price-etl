@@ -1,3 +1,4 @@
+import logging
 from collections import deque
 
 from typing import Dict
@@ -8,6 +9,9 @@ import pandas as pd
 from trade_price_etl.constants.constants import Metrics
 
 queue_max_size = 100000
+
+
+logger = logging.getLogger(__name__)
 
 
 class RealTimeMetricStorage:
@@ -35,7 +39,7 @@ class RealTimeMetricStorage:
             price_item = self._price_map_r[hit_price_idx]
             metric_item = self._metric_map_r[hit_metric_idx]
             signal = self._metric[hit_price_idx][hit_metric_idx]
-            print("Trade Item: {}, Metric: {}, Signal: {}".format(
+            logger.info("Trade Item: {}, Metric: {}, Signal: {}".format(
                 price_item, metric_item, signal
             ))
 

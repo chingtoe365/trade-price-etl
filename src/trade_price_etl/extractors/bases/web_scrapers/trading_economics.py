@@ -21,8 +21,8 @@ def get_price_from_df(df: pd.DataFrame, col_name: str, item: str,):
 
 class TradingEconomicsScraperBase:
     _url_base = 'https://tradingeconomics.com'
-    _poll_frequency = 1
-    _wait_for_blockade_unfrozen = 3
+    _poll_frequency = 3
+    _wait_for_blockade_unfrozen = 5
 
     def __init__(self, url_dir: str, target_table_index: str, name_column: str):
         self._url_dir = url_dir
@@ -61,7 +61,7 @@ class TradingEconomicsScraperBase:
                 full_html = driver.page_source
                 try:
                     dfs = pd.read_html(full_html)
-                    logger.debug(">> Read html into table")
+                    # logger.debug(">> Read html into table")
                 except ValueError as ve:
                     # catch exception when sometimes no tables are found then skip and continue
                     if ve.args[0].lower() == 'no tables found':

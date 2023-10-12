@@ -10,8 +10,7 @@ source activate trade-price-etl
 if [[ -n $1 ]];
 then
   echo ">> Developer mode"
-#  watchgod trade_price_etl
-  python -m trade_price_etl
+  watchfiles "python -m trade_price_etl" /app
 else
   echo ">> Production mode"
   python -m trade_price_etl

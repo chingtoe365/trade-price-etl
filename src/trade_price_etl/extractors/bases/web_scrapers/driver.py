@@ -35,6 +35,7 @@ class SeleniumDriver(ContextDecorator):
             chrome_options=self._chrome_options,
             **self._kwargs
         )
+        # self.driver = webdriver.Firefox()
         return self.driver
 
     def _get_kwargs(self):
@@ -53,7 +54,7 @@ class SeleniumDriver(ContextDecorator):
         could be timeouted by its parent, this could cause the exit to
         not be called.
         """
-        """ 
+        """
             !Remember __del__ and circular references are enemies
         """
         if self.driver:

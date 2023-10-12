@@ -1,6 +1,5 @@
 
 services:
-
   etl:
     image: ${IMAGE}
     build:
@@ -9,20 +8,26 @@ services:
       args:
         CONDA_ENV_FILE: environment.yml
     command: sleep 5000
+    volumes:
+      - ./src:/app/src
     networks:
       - service-net
 
-  mongodb:
-    image: mongo:latest
-    restart: always
-    command: mongod --quiet --logpath /dev/null
-#    ports:
-#      - 27017:27017
-    networks:
-      - service-net
+#  mongodb:
+#    image: mongo:latest
+#    restart: always
+#    command: mongod --quiet --logpath /dev/null
+##    ports:
+##      - 27017:27017
+#    networks:
+#      - service-net
 
 
 networks:
   service-net:
     name: ${INTERNAL_NETWORK}
 #    external: true
+
+volumes:
+   mqtt-broker-data:
+       name: "mqtt-broker-data2"

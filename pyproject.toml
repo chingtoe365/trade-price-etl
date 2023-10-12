@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "trade-price-etl"
+version = "0.1.0"
+description = ""
+authors = ["jintaolong <longjintao59@gmail.com>"]
+readme = "README.md"
+packages = [{include = "trade_price_etl"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "4.6.0"
+pandas = "1.5.1"
+lxml = "4.9.1"
+pydantic = "2.0.3"
+pydantic-settings = "2.0.2"
+paho-mqtt = "1.6.1"
+python-json-logger = "2.0.7"
+html5lib = "^1.1"
+beautifulsoup4 = "^4.12.2"
+
+
+[tool.poetry.group.dev.dependencies]
+watchfiles = "^0.20.0"
+pytest = "^7.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

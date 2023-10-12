@@ -1,0 +1,50 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "default": {
+            "format": "%(asctime)s - %(process)s - %(name)s - %(levelname)s - %(message)s"
+        },
+        "simple": {
+            "format": "%(levelname)s|%(message)s"
+        },
+        "compact": {
+            "format": "%%(asctime)s|(levelname)s|%(name)s|%(process)d|%(thread)d|%(message)s"
+        },
+        "verbose": {
+            "format": "%(asctime)s%(levelname)8s-%(name)s(%(funcName)s:%(lineno)d)-%(process)d|%(thread)d|%(message)s"
+        },
+        "json": {
+            "class": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": "%(asctime)s %(levelname)s %(name)s %(funcName)s %(lineno)d %(process)d %(thread)d %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "formatter": "verbose",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "level": "DEBUG"
+        },
+        "null": {
+            "level": "DEBUG",
+            "class": "logging.NullHandler"
+        }
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG"
+    },
+    "loggers": {
+        "py.warnings": {
+            "level": "CRITICAL"
+        },
+        "selenium": {
+            "level": "INFO"
+        },
+        "urllib3": {
+            "level": "INFO"
+        }
+    }
+}
+

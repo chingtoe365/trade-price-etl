@@ -35,7 +35,7 @@ def connect_mqtt():
 
 
 def publish(client, topic, message):
-    msg = f"messages: {message}"
+    msg = f"{message}"
     result = client.publish(topic, msg)
     # result: [0, 1]
     status = result[0]

@@ -18,14 +18,9 @@ services:
       source: data
       target: /mosquitto/data/
     ports:
-    - target: 1883
-      published: 1883
-      protocol: tcp
-      mode: host
-    - target: 9001
-      published: 9001
-      protocol: tcp
-      mode: host
+    - "1883:1883"
+    - "9001:9001"
+    - "8080:8080"
 
 volumes:
    data:

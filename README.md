@@ -6,7 +6,7 @@ ETL tool to obtain trade data publicly
 >
 > docker-compose build
 >
-> docker-compose up
+> docker-compose -f docker-compose.development.yml up
 >
 This will run the pipeline to scrape crypto currrencies
 

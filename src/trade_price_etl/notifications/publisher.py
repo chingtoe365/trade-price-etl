@@ -33,7 +33,6 @@ def connect_mqtt():
     logger.debug(f">> After connection")
     return client
 
-
 def publish(client, topic, message):
     msg = f"{message}"
     result = client.publish(topic, msg)

@@ -81,5 +81,7 @@ class TradingEconomicsScraperBase:
                             # msg = '%s Price: $%s' % (price_name, new_price)
                             # logger.warning('publish new message to topic: ' + price_name + '; message: ' + msg)
 
+                        publich_message(price_name, 'Get a new message')
+
                     df_old = df.copy()
                 await asyncio.sleep(self._poll_frequency)

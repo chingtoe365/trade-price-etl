@@ -30,7 +30,7 @@ async def streamline_extractors():
     energy_extractor = TradingEconomicsScraperBase('commodities', 0, 'Energy')
     metal_extractor = TradingEconomicsScraperBase('commodities', 1, 'Metals')
     agriculture_extractor = TradingEconomicsScraperBase('commodities', 2, 'Agricultural')
-    livestock_extractor = TradingEconomicsScraperBase('commodities', 3, 'Livestock')
+    livestock_extractor = TradingEconomicsScraperBase('commodities', 3, 'Industrial')
     forex_extractor = TradingEconomicsScraperBase('currencies', 0, 'Major')
     # await crypto_extractor.extract()
     asyncio.gather(

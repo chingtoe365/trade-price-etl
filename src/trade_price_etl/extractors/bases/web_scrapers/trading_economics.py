@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import logging
+import re
 import sys
 import time
 
@@ -21,10 +22,10 @@ def get_price_from_df(df: pd.DataFrame, col_name: str, item: str,):
 
 class TradingEconomicsScraperBase:
     _url_base = 'https://tradingeconomics.com'
-    _poll_frequency = 3
-    _wait_for_blockade_unfrozen = 5
+    _poll_frequency = 5
+    _wait_for_blockade_unfrozen = 20
 
-    def __init__(self, url_dir: str, target_table_index: str, name_column: str):
+    def __init__(self, url_dir: str, target_table_index: int, name_column: str):
         self._url_dir = url_dir
         self._target_table_idx = target_table_index
         self._name_col = name_column
@@ -46,9 +47,16 @@ class TradingEconomicsScraperBase:
                     if len(dfs_old) > 0:
                         df_old = dfs_old[self._target_table_idx]
                         table_not_found_error = False
-                    logger.debug(">> First attempt successful")
+                    logger.debug(
+                        ">> First attempt successful. Category: %s, Idx: %s",
+                        self._url_dir, str(self._target_table_idx)
+                    )
                 except ValueError as ve:
-                    logger.warning(">> Exception found in first attempt")
+                    logger.warning(
+                        f">> Exception found in first attempt. Table: {self._name_col}"
+                    )
+                    logger.warning(ve)
+                    logger.warning(re.search("<table", full_html))
                     if ve.args[0].lower() == 'no tables found':
                         await asyncio.sleep(self._wait_for_blockade_unfrozen)
                         continue
@@ -65,7 +73,7 @@ class TradingEconomicsScraperBase:
                 except ValueError as ve:
                     # catch exception when sometimes no tables are found then skip and continue
                     if ve.args[0].lower() == 'no tables found':
-                        logger.warning(">> No tables found")
+                        logger.warning(f">> No table: {self._name_col} found.")
                         await asyncio.sleep(self._wait_for_blockade_unfrozen)
                         continue
                 df = dfs[self._target_table_idx]

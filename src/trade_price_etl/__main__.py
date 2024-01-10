@@ -26,8 +26,22 @@ def mp_debug(a, b):
 
 
 async def streamline_extractors():
-    crypto_extractor = TradingEconomicsScraperBase('crypto', 0, 'Crypto')
-    await crypto_extractor.extract()
+    # crypto_extractor = TradingEconomicsScraperBase('crypto', 0, 'Crypto')
+    energy_extractor = TradingEconomicsScraperBase('commodities', 0, 'Energy')
+    metal_extractor = TradingEconomicsScraperBase('commodities', 1, 'Metals')
+    agriculture_extractor = TradingEconomicsScraperBase('commodities', 2, 'Agricultural')
+    livestock_extractor = TradingEconomicsScraperBase('commodities', 3, 'Livestock')
+    forex_extractor = TradingEconomicsScraperBase('currencies', 0, 'Major')
+    # await crypto_extractor.extract()
+    asyncio.gather(
+        # crypto_extractor.extract(),
+        energy_extractor.extract(),
+        metal_extractor.extract(),
+        agriculture_extractor.extract(),
+        livestock_extractor.extract(),
+        forex_extractor.extract()
+    )
+    # await crypto_extractor.extract()
 
 
 async def streamline_calculators():

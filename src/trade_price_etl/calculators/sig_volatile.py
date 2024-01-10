@@ -7,7 +7,7 @@ import numpy as np
 
 from trade_price_etl.calculators.base import CalculatorBase
 from trade_price_etl.constants.constants import Metrics, MetricsShortDescription
-from trade_price_etl.notifications.publisher import publish, MQTT_CLIENT
+from trade_price_etl.notifications.publisher import publish
 from trade_price_etl.utils.utils import build_mqtt_topic
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,6 @@ class VolatileSignal(CalculatorBase):
                 f">> {price_item} price go up > {cls.small_threshold * 100}% in last 1 minutes"
             )
             publish(
-                MQTT_CLIENT,
                 build_mqtt_topic(price_item, str(Metrics.VOLATILE_UP_1_1)),
                 f"{MetricsShortDescription.VOLATILE_UP_1_1}"
             )
@@ -72,7 +71,6 @@ class VolatileSignal(CalculatorBase):
                 f">> {price_item} price go down > {cls.small_threshold * 100}% in last 1 minutes"
             )
             publish(
-                MQTT_CLIENT,
                 build_mqtt_topic(price_item, str(Metrics.VOLATILE_DOWN_1_1)),
                 f"{MetricsShortDescription.VOLATILE_DOWN_1_1}"
             )
@@ -87,7 +85,6 @@ class VolatileSignal(CalculatorBase):
                 f">> {price_item} price go up > {cls.small_threshold * 100}% in last 5 minutes"
             )
             publish(
-                MQTT_CLIENT,
                 build_mqtt_topic(price_item, str(Metrics.VOLATILE_UP_1_5)),
                 f"{MetricsShortDescription.VOLATILE_UP_1_5}"
             )
@@ -98,7 +95,6 @@ class VolatileSignal(CalculatorBase):
                 f">> {price_item} price go down > {cls.small_threshold * 100}% in last d5 minutes"
             )
             publish(
-                MQTT_CLIENT,
                 build_mqtt_topic(price_item, str(Metrics.VOLATILE_DOWN_1_5)),
                 f"{MetricsShortDescription.VOLATILE_DOWN_1_5}"
             )

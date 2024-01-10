@@ -3,15 +3,13 @@ import datetime
 import logging
 import re
 import sys
-import time
 
 import pandas as pd
 from urllib.parse import urljoin
 
 from trade_price_etl.extractors.bases.web_scrapers.driver import SeleniumDriver
-from trade_price_etl.settings.base_settings import settings
 from trade_price_etl.storage.real_time_price import RTS
-from trade_price_etl.notifications.publisher import publich_message, connect_mqtt, publish
+
 
 logger = logging.getLogger(__name__)
 

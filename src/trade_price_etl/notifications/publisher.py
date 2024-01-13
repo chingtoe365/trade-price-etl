@@ -5,6 +5,7 @@ import sys
 
 # pip3 install paho-mqtt
 from paho.mqtt import client as mqtt_client
+import paho.mqtt.publish as mqtt_publish
 
 from trade_price_etl.settings.base_settings import settings
 
@@ -34,18 +35,23 @@ def connect_mqtt():
     return client
 
 
-def publish(client, topic, message):
-    msg = f"{message}"
-    result = client.publish(topic, msg)
-    # result: [0, 1]
-    status = result[0]
-    if status == 0:
-        logger.info(f"Send `{msg}` to topic `{topic}`")
-    else:
-        logger.error(f"Failed to send message to topic {topic}")
+def publish(topic, message):
+    # msg = f"{message}"
+    # result = client.publish(topic, msg)
+    # # result: [0, 1]
+    # status = result[0]
+    # if status == 0:
+    #     logger.info(f"Send `{msg}` to topic `{topic}`")
+    # else:
+    #     logger.error(f"Failed to send message to topic {topic}")
+    mqtt_publish.single(
+        topic,
+        message,
+        hostname=settings.MQTT_HOST
+    )
 
 
-def publich_message(topic, message):
+def publish_message(topic, message):
     client = connect_mqtt()
     client.loop_start()
     publish(client, topic, message)
@@ -59,4 +65,4 @@ MQTT_CLIENT.loop_start()
 if __name__ == '__main__':
     topic = sys.argv[1]
     message = sys.argv[2]
-    publich_message(topic, message)
+    publish_message(topic, message)

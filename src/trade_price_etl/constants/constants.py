@@ -15,3 +15,14 @@ class Metrics(Enum):
 
     def __str__(self):
         return self.value
+
+
+class MetricsShortDescription(Enum):
+    DOUBLE_PEG = 'Swinging between two points for a while'
+    VOLATILE_UP_1_1 = 'Go up more than 1% in 1 minute'
+    VOLATILE_UP_1_5 = 'Go up more than 1% in 5 minutes'
+    VOLATILE_DOWN_1_1 = 'Go down more than 1% in 1 minute'
+    VOLATILE_DOWN_1_5 = 'Go down more than 1% in 5 minutes'
+
+    def __str__(self):
+        return self.value

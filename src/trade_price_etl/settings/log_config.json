@@ -33,7 +33,7 @@
     },
     "root": {
         "handlers": ["console"],
-        "level": "DEBUG"
+        "level": "INFO"
     },
     "loggers": {
         "py.warnings": {

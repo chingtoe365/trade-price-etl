@@ -1,12 +1,14 @@
 import datetime
+import json
 import logging
 
 import pandas as pd
 import numpy as np
 
 from trade_price_etl.calculators.base import CalculatorBase
-from trade_price_etl.constants.constants import Metrics
-from trade_price_etl.notifications.publisher import publish, MQTT_CLIENT
+from trade_price_etl.constants.constants import Metrics, MetricsShortDescription
+from trade_price_etl.notifications.publisher import publish
+from trade_price_etl.utils.utils import build_mqtt_topic
 
 logger = logging.getLogger(__name__)
 
@@ -58,14 +60,20 @@ class VolatileSignal(CalculatorBase):
             logger.warning(
                 f">> {price_item} price go up > {cls.small_threshold * 100}% in last 1 minutes"
             )
-            publish(MQTT_CLIENT, f"{price_item}_{str(Metrics.VOLATILE_UP_1_1)}", 1)
+            publish(
+                build_mqtt_topic(price_item, str(Metrics.VOLATILE_UP_1_1)),
+                f"{MetricsShortDescription.VOLATILE_UP_1_1}"
+            )
         if not np.isnan(pch_one_minute_ago) and pch_one_minute_ago < -cls.small_threshold:
             # If price go down more than 1% in the last minute
             # raise signal
             logger.warning(
                 f">> {price_item} price go down > {cls.small_threshold * 100}% in last 1 minutes"
             )
-            publish(MQTT_CLIENT, f"{price_item}_{str(Metrics.VOLATILE_DOWN_1_1)}", 1)
+            publish(
+                build_mqtt_topic(price_item, str(Metrics.VOLATILE_DOWN_1_1)),
+                f"{MetricsShortDescription.VOLATILE_DOWN_1_1}"
+            )
 
         price_five_minute_ago = get_price_n_minutes_ago(5, df)
         pch_five_minute_ago = (price_current - price_five_minute_ago) / price_one_minute_ago
@@ -76,11 +84,17 @@ class VolatileSignal(CalculatorBase):
             logger.warning(
                 f">> {price_item} price go up > {cls.small_threshold * 100}% in last 5 minutes"
             )
-            publish(MQTT_CLIENT, f"{price_item}_{str(Metrics.VOLATILE_UP_1_5)}", 1)
+            publish(
+                build_mqtt_topic(price_item, str(Metrics.VOLATILE_UP_1_5)),
+                f"{MetricsShortDescription.VOLATILE_UP_1_5}"
+            )
         if not np.isnan(pch_five_minute_ago) and pch_five_minute_ago < -cls.small_threshold:
             # If price go down more than 1% in the last 5 minutes
             # raise signal
             logger.warning(
                 f">> {price_item} price go down > {cls.small_threshold * 100}% in last d5 minutes"
             )
-            publish(MQTT_CLIENT, f"{price_item}_{str(Metrics.VOLATILE_DOWN_1_5)}", 1)
+            publish(
+                build_mqtt_topic(price_item, str(Metrics.VOLATILE_DOWN_1_5)),
+                f"{MetricsShortDescription.VOLATILE_DOWN_1_5}"
+            )

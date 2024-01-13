@@ -42,7 +42,7 @@ def get_price_n_minutes_ago(n: int, df: pd.DataFrame) -> float:
 class VolatileSignal(CalculatorBase):
 
     metric_name = 'volatile'
-    small_threshold = 0.0001 #0.0008
+    small_threshold = 0.01  # 0.0008
     one_min_emit_frozen_duration = 180
     five_min_emit_frozen_duration = 1500
 

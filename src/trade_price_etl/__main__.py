@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import sys
-from multiprocessing import Pool
+from multiprocessing import Pool, Manager
 
 from trade_price_etl.calculators.sig_doube_peg import DoublePegSignal
 from trade_price_etl.calculators.sig_volatile import VolatileSignal
@@ -46,7 +46,8 @@ async def streamline_extractors():
 
 async def streamline_calculators():
     logger.debug(f">> Live calculator is on")
-    with Pool(processes=2) as p:
+    with Pool(processes=3) as p, Manager() as manager:
+        last_emissions = manager.dict()
         while True:
             await asyncio.sleep(COMPUTE_FREQUENCY)
             all_price_dfs = RTS.get_data()
@@ -58,7 +59,7 @@ async def streamline_calculators():
                     p.starmap(
                         klass.compute,
                         [
-                            (price, all_price_dfs[price]) for price in all_price_dfs
+                            (price, all_price_dfs[price], last_emissions) for price in all_price_dfs
                         ]
                     )
                     # logger.debug(f"Multiprocessing jobs assignment completed")

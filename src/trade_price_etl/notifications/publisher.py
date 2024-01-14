@@ -55,7 +55,9 @@ def publish(last_emits: Dict, topic: str, message: str, frozen_duration: int) ->
         mqtt_publish.single(
             topic,
             message,
-            hostname=settings.MQTT.HOST
+            hostname=settings.MQTT.HOST,
+            qos=2,
+            retain=False
         )
         logger.info("Published message '%s' to topic '%s'", message, topic)
         # logger.debug("Current last emission dict >>> ")

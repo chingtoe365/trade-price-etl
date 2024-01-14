@@ -1,4 +1,5 @@
 """ Program wide utilities"""
+import datetime
 
 
 def build_mqtt_topic(trade_item: str, signal: str):
@@ -9,3 +10,4 @@ def build_mqtt_topic(trade_item: str, signal: str):
     @return:
     """
     return f'{trade_item.replace(" ", "-").replace("/", "-").lower()}/{signal}'
+

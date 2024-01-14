@@ -1,68 +1,62 @@
+import datetime
 import logging
-import random
-import time
-import sys
+from typing import Dict
 
-# pip3 install paho-mqtt
-from paho.mqtt import client as mqtt_client
 import paho.mqtt.publish as mqtt_publish
 
+from multiprocessing import Array, Manager
 from trade_price_etl.settings.base_settings import settings
 
-# broker = 'host.docker.internal'
-# port = 1883
+
 logger = logging.getLogger(__name__)
 
-# Generate a Client ID with the publish prefix.
-# username = 'admin'
-# password = 'password'
+# mp_manager = Manager()
+# _LAST_EMISSIONS = mp_manager.dict()
+# _LAST_EMISSIONS = {}
+
+# _LAST_EMISSIONS = Array('last_emission', )
 
 
-def connect_mqtt():
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            logger.info("Connected to MQTT Broker!")
-        else:
-            logger.error("Failed to connect, return code %d\n", rc)
+def freeze_or_emit(last_emissions: Dict, topic: str, frozen_duration: int) -> bool:
+    """ Return decision to freeze or emit signals, if True emit else freeze
 
-    logger.debug(f">> before connection")
-    client_id = f'publish-{random.randint(0, 1000)}'
-    client = mqtt_client.Client(client_id)
-    # client.username_pw_set(username, password)
-    client.on_connect = on_connect
-    client.connect(settings.MQTT_HOST, settings.MQTT_PORT)
-    logger.debug(f">> After connection")
-    return client
-
-
-def publish(topic, message):
-    # msg = f"{message}"
-    # result = client.publish(topic, msg)
-    # # result: [0, 1]
-    # status = result[0]
-    # if status == 0:
-    #     logger.info(f"Send `{msg}` to topic `{topic}`")
-    # else:
-    #     logger.error(f"Failed to send message to topic {topic}")
-    mqtt_publish.single(
-        topic,
-        message,
-        hostname=settings.MQTT_HOST
-    )
+    @param last_emissions: sharable dictionary recording last emissions for all signals
+    @param topic: topic to be emitted to it is consisted of price item and signal name
+    @param frozen_duration: emission even frozen duration since last, in seconds
+    @return: True to emit Flase do nothing (freeze)
+    """
+    to_emit = False
+    last_emit = last_emissions.get(topic, None)
+    # logger.debug(_LAST_EMISSIONS)
+    now = datetime.datetime.now()
+    # logger.debug(now.strftime("%H:%M:s"))
+    if last_emit:
+        elapsed = now - last_emit
+        # logger.debug(elapsed.seconds)
+        if elapsed.seconds > frozen_duration:
+            last_emissions[topic] = now
+            to_emit = True
+    else:
+        last_emissions[topic] = now
+        to_emit = True
+    return to_emit
 
 
-def publish_message(topic, message):
-    client = connect_mqtt()
-    client.loop_start()
-    publish(client, topic, message)
-    client.loop_stop()
+def publish(last_emits: Dict, topic: str, message: str, frozen_duration: int) -> None:
+    """ Publish a message to MQTT
 
-
-MQTT_CLIENT = connect_mqtt()
-MQTT_CLIENT.loop_start()
-
-
-if __name__ == '__main__':
-    topic = sys.argv[1]
-    message = sys.argv[2]
-    publish_message(topic, message)
+    @param last_emits:
+    @param topic:
+    @param message:
+    @param frozen_duration: emission even frozen duration since last, in seconds
+    @return:
+    """
+    if freeze_or_emit(last_emits, topic, frozen_duration):
+        mqtt_publish.single(
+            topic,
+            message,
+            hostname=settings.MQTT.HOST
+        )
+        logger.info("Published message '%s' to topic '%s'", message, topic)
+        # logger.debug("Current last emission dict >>> ")
+        # logger.debug(last_emits)

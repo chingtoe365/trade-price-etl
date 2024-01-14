@@ -60,7 +60,7 @@ class TradingEconomicsScraperBase:
                         continue
                     else:
                         sys.exit(f"Error getting table: {ve.args[0]}")
-            logger.debug(">> Getting into the loop")
+            # logger.debug(">> Getting into the loop")
             # driver.get(full_url)
             while True:
                 driver.get(full_url)
@@ -81,7 +81,7 @@ class TradingEconomicsScraperBase:
                         new_price = df['Price'][i]
                         old_price = df_old['Price'][i]
                         if new_price != old_price:
-                            logger.debug(f'>> {price_name} \n old: {old_price} \n new: {new_price}')
+                            # logger.debug(f'>> {price_name} \n old: {old_price} \n new: {new_price}')
                             # store in storage
                             RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
                             # msg = '%s Price: $%s' % (price_name, new_price)

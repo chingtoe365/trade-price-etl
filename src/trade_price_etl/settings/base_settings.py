@@ -20,6 +20,8 @@ class EtlSettings(BaseSettings, case_sensitive=True):
 
     SIGNAL: SignalSettings = SignalSettings()
 
+    DEBUG: bool = False
+    DEBUG_WEEKEND: bool = False
     MP_CALCULATOR_WORKERS: int = 3
 
 

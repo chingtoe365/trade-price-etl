@@ -9,6 +9,7 @@ import numpy as np
 from trade_price_etl.calculators.base import CalculatorBase
 from trade_price_etl.constants.constants import Metrics, MetricsShortDescription
 from trade_price_etl.notifications.publisher import publish
+from trade_price_etl.settings.base_settings import settings
 from trade_price_etl.utils.utils import build_mqtt_topic
 
 logger = logging.getLogger(__name__)
@@ -42,9 +43,10 @@ def get_price_n_minutes_ago(n: int, df: pd.DataFrame) -> float:
 class VolatileSignal(CalculatorBase):
 
     metric_name = 'volatile'
-    small_threshold = 0.01  # 0.0008
-    one_min_emit_frozen_duration = 180
-    five_min_emit_frozen_duration = 1500
+    # 0.0008 best for weekend crypto debug
+    small_threshold = settings.SIGNAL.VOLATILITY_CUTOFF
+    one_min_emit_frozen_duration = settings.SIGNAL.FROZEN_WINDOW_VOLATILITY_ONE_MINUTE
+    five_min_emit_frozen_duration = settings.SIGNAL.FROZEN_WINDOW_VOLATILITY_FIVE_MINUTE
 
     @classmethod
     def compute(cls, price_item: str, df: pd.DataFrame, last_emissions: Dict):

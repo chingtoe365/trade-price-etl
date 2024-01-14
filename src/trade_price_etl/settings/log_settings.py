@@ -5,7 +5,7 @@ import sys
 from typing import Optional, Union, Dict, Any
 
 from pydantic import FilePath, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pythonjsonlogger import jsonlogger
 
 import logging.config as log_conf
@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class LoggingSettings(BaseSettings):
+
+    model_config = SettingsConfigDict(env_prefix='LOGGING_')
+
     LEVEL: str = "INFO"
     CAPTURE_WARNINGS: bool = True
     IGNORE_WARNINGS: bool = True

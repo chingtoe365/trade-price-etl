@@ -10,7 +10,7 @@ from trade_price_etl.calculators.base import CalculatorBase
 from trade_price_etl.constants.constants import Metrics, MetricsShortDescription
 from trade_price_etl.notifications.publisher import publish
 from trade_price_etl.settings.base_settings import settings
-from trade_price_etl.utils.utils import build_mqtt_topic
+from trade_price_etl.utils.utils import build_mqtt_topic, is_latest_price_up_to_date
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +57,13 @@ class VolatileSignal(CalculatorBase):
         @param last_emissions:
         @return:
         """
-        # logger.debug(f">> Computing metric: {cls.metric_name} item: {price_item}")
-        # logger.debug(">> another message")
-        # logger.debug(f">> check DF : {df[-1]['price']}")
+        if not is_latest_price_up_to_date(df):
+            # latest data point too out-dated
+            # possibly due to not changing price
+            # logger.debug(">> Latest price outdated")
+            return
         price_current = float(df.at[df.index[-1], 'price'])
+
         # logger.debug(price_current)
         price_one_minute_ago = get_price_n_minutes_ago(1, df)
         # logger.debug(price_one_minute_ago)

@@ -7,7 +7,7 @@ from trade_price_etl.calculators.base import CalculatorBase
 from trade_price_etl.constants.constants import Metrics, MetricsShortDescription
 from trade_price_etl.notifications.publisher import publish
 from trade_price_etl.settings.base_settings import settings
-from trade_price_etl.utils.utils import build_mqtt_topic
+from trade_price_etl.utils.utils import build_mqtt_topic, is_latest_price_up_to_date
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,11 @@ class DoublePegSignal(CalculatorBase):
 
     @classmethod
     def compute(cls, price_item: str, df: pd.DataFrame, last_emissions: Dict):
+        if not is_latest_price_up_to_date(df):
+            # latest data point too out-dated
+            # possibly due to not changing price
+            # logger.debug(">> Latest price outdated")
+            return
         # logger.debug(f">> Computing metric: {cls.metric_name} item: {price_item}")
         # only calculate from the last 50 price points
         df = df[-settings.SIGNAL.DOUBLE_PEG_TIME_SPAN:]

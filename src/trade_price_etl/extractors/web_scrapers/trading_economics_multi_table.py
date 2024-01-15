@@ -3,11 +3,13 @@ import datetime
 import logging
 import re
 import sys
+from typing import List
 
 import pandas as pd
 from urllib.parse import urljoin
 
-from trade_price_etl.extractors.bases.web_scrapers.driver import SeleniumDriver
+from trade_price_etl.extractors.web_scrapers.driver import SeleniumDriver
+from trade_price_etl.settings.base_settings import settings
 from trade_price_etl.storage.real_time_price import RTS
 
 
@@ -18,18 +20,18 @@ def get_price_from_df(df: pd.DataFrame, col_name: str, item: str,):
     return df[df[col_name] == item]['Price'][0]
 
 
-class TradingEconomicsScraperBase:
+class TradingEconomicsMultiTableScraper:
     _url_base = 'https://tradingeconomics.com'
-    _poll_frequency = 5
-    _wait_for_blockade_unfrozen = 20
+    _poll_frequency = settings.EXTRACTOR.POLL_FREQUENCY_MULTIPLE_TABLES
+    _wait_for_blockade_unfrozen = settings.EXTRACTOR.BLOCKADE_STOPPAGE_WAIT
 
-    def __init__(self, url_dir: str, target_table_index: int, name_column: str):
+    def __init__(self, url_dir: str, target_table_num: int, name_columns: List[str]):
         self._url_dir = url_dir
-        self._target_table_idx = target_table_index
-        self._name_col = name_column
+        self._target_table_num = target_table_num
+        self._name_cols = name_columns
 
     async def extract(self):
-        table_not_found_error = True
+        tables_not_found_error = True
         full_url = urljoin(self._url_base, self._url_dir)
         # logger.info(settings.model_dump())
         # print("ok")
@@ -39,23 +41,29 @@ class TradingEconomicsScraperBase:
             full_html = driver.page_source
             # df_old = pd.DataFrame()
             # dfs = pd.DataFrame()
-            while table_not_found_error:
+            while tables_not_found_error:
                 try:
                     dfs_old = pd.read_html(full_html)
-                    if len(dfs_old) > 0:
-                        df_old = dfs_old[self._target_table_idx]
-                        table_not_found_error = False
+                    if len(dfs_old) >= self._target_table_num and all(isinstance(df, pd.DataFrame) for df in dfs_old):
+                        tables_not_found_error = False
+                    else:
+                        logger.warning(
+                            "First attempt found %d/%d tables. Will try again in %d secs",
+                            len(dfs_old), self._target_table_num, self._wait_for_blockade_unfrozen
+                        )
+                        await asyncio.sleep(self._wait_for_blockade_unfrozen)
+                        continue
                     logger.debug(
-                        ">> First attempt successful. Category: %s, Idx: %s",
-                        self._url_dir, str(self._target_table_idx)
+                        ">> First attempt successful. Category: %s, Table number: %s",
+                        self._url_dir, str(self._target_table_num)
                     )
                 except ValueError as ve:
-                    logger.warning(
-                        f">> Exception found in first attempt. Table: {self._name_col}"
-                    )
-                    logger.warning(ve)
-                    logger.warning(re.search("<table", full_html))
                     if ve.args[0].lower() == 'no tables found':
+                        logger.warning(
+                            "Exception found in first attempt. Page: %s. Will try again in %d secs",
+                            self._url_dir,
+                            self._wait_for_blockade_unfrozen
+                        )
                         await asyncio.sleep(self._wait_for_blockade_unfrozen)
                         continue
                     else:
@@ -71,13 +79,26 @@ class TradingEconomicsScraperBase:
                 except ValueError as ve:
                     # catch exception when sometimes no tables are found then skip and continue
                     if ve.args[0].lower() == 'no tables found':
-                        logger.warning(f">> No table: {self._name_col} found.")
+                        logger.warning(
+                            "No tables found. Page: %s. Will try again in %d secs",
+                            self._url_dir,
+                            self._wait_for_blockade_unfrozen
+                        )
                         await asyncio.sleep(self._wait_for_blockade_unfrozen)
                         continue
-                df = dfs[self._target_table_idx]
-                if isinstance(df_old, pd.DataFrame) and len(df_old) > 0:
+
+                if len(dfs) < self._target_table_num:
+                    logger.warning(
+                        f">> Not enough tables found. {self._target_table_num} required but found {len(dfs)}"
+                    )
+                    await asyncio.sleep(self._wait_for_blockade_unfrozen)
+                    continue
+                for table_idx in range(self._target_table_num):
+                    df = dfs[table_idx]
+                    # if isinstance(df_old, pd.DataFrame) and len(df_old) > 0:
+                    df_old = dfs_old[table_idx]
                     for i in df.index:
-                        price_name = df[self._name_col][i]
+                        price_name = df[self._name_cols[table_idx]][i]
                         new_price = df['Price'][i]
                         old_price = df_old['Price'][i]
                         if new_price != old_price:
@@ -86,6 +107,6 @@ class TradingEconomicsScraperBase:
                             RTS.insert(price_name, datetime.datetime.now().timestamp(), new_price)
                             # msg = '%s Price: $%s' % (price_name, new_price)
                             # logger.warning('publish new message to topic: ' + price_name + '; message: ' + msg)
+                dfs_old = dfs
 
-                    df_old = df.copy()
                 await asyncio.sleep(self._poll_frequency)

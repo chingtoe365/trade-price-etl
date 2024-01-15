@@ -1,15 +1,12 @@
 import datetime
 import logging
-import re
 import time
 from typing import List
 from urllib.parse import urljoin
 
 from selenium.webdriver.chrome import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 
-from trade_price_etl.extractors.bases.web_scrapers.driver import SeleniumDriver
+from trade_price_etl.extractors.web_scrapers.driver import SeleniumDriver
 
 logger = logging.getLogger(__name__)
 

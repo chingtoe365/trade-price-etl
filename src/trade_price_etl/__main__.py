@@ -5,9 +5,9 @@ from multiprocessing import Pool, Manager
 
 from trade_price_etl.calculators.sig_doube_peg import DoublePegSignal
 from trade_price_etl.calculators.sig_volatile import VolatileSignal
-from trade_price_etl.extractors.bases.web_scrapers.trading_economics import TradingEconomicsScraperBase
+from trade_price_etl.extractors.web_scrapers.trading_economics_multi_table import TradingEconomicsMultiTableScraper
+from trade_price_etl.extractors.web_scrapers.trading_economics_single_table import TradingEconomicsSingleTableScraper
 from trade_price_etl.settings.base_settings import settings
-from trade_price_etl.storage.real_time_metric import RTMS
 from trade_price_etl.storage.real_time_price import RTS
 
 logger = logging.getLogger(__name__)
@@ -26,12 +26,11 @@ def mp_debug(a, b):
 
 
 async def streamline_extractors():
-    crypto_extractor = TradingEconomicsScraperBase('crypto', 0, 'Crypto')
-    energy_extractor = TradingEconomicsScraperBase('commodities', 0, 'Energy')
-    metal_extractor = TradingEconomicsScraperBase('commodities', 1, 'Metals')
-    agriculture_extractor = TradingEconomicsScraperBase('commodities', 2, 'Agricultural')
-    industrial_extractor = TradingEconomicsScraperBase('commodities', 3, 'Industrial')
-    forex_extractor = TradingEconomicsScraperBase('currencies', 0, 'Major')
+    crypto_extractor = TradingEconomicsSingleTableScraper('crypto', 0, 'Crypto')
+    commodity_extractor = TradingEconomicsMultiTableScraper(
+        'commodities', 4, ['Energy', 'Metals', 'Agricultural', 'Industrial']
+    )
+    forex_extractor = TradingEconomicsSingleTableScraper('currencies', 0, 'Major')
 
     if settings.DEBUG_WEEKEND:
         asyncio.gather(
@@ -39,10 +38,7 @@ async def streamline_extractors():
         )
     else:
         asyncio.gather(
-            energy_extractor.extract(),
-            metal_extractor.extract(),
-            agriculture_extractor.extract(),
-            industrial_extractor.extract(),
+            commodity_extractor.extract(),
             forex_extractor.extract()
         )
 

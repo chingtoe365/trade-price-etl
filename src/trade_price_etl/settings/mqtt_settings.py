@@ -7,5 +7,5 @@ class MqttSettings(BaseSettings):
 
     HOST: str = ''
     PORT: int = 1
-    USERNAME: str = ''
+    USER: str = ''
     PASSWORD: str = ''

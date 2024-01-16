@@ -67,7 +67,7 @@ class VolatileSignal(CalculatorBase):
         # logger.debug(price_current)
         price_one_minute_ago = get_price_n_minutes_ago(1, df)
         # logger.debug(price_one_minute_ago)
-        pch_one_minute_ago = (price_current - price_one_minute_ago) / price_one_minute_ago
+        pch_one_minute_ago = float(price_current - price_one_minute_ago) / price_one_minute_ago
         # logger.debug(f" Percentage change ONE min ago: {pch_one_minute_ago}")
         if not np.isnan(pch_one_minute_ago) and pch_one_minute_ago > cls.small_threshold:
             topic = build_mqtt_topic(price_item, str(Metrics.VOLATILE_UP_1_1))
@@ -99,7 +99,7 @@ class VolatileSignal(CalculatorBase):
             )
 
         price_five_minute_ago = get_price_n_minutes_ago(5, df)
-        pch_five_minute_ago = (price_current - price_five_minute_ago) / price_one_minute_ago
+        pch_five_minute_ago = float(price_current - price_five_minute_ago) / price_five_minute_ago
         # logger.debug(f" Percentage change FIVE min ago: {pch_five_minute_ago}")
         if not np.isnan(pch_five_minute_ago) and pch_five_minute_ago > cls.small_threshold:
             topic = build_mqtt_topic(price_item, str(Metrics.VOLATILE_UP_1_5))

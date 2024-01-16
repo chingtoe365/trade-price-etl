@@ -30,6 +30,9 @@ async def streamline_extractors():
     commodity_extractor = TradingEconomicsMultiTableScraper(
         'commodities', 4, ['Energy', 'Metals', 'Agricultural', 'Industrial']
     )
+    stock_extractor = TradingEconomicsMultiTableScraper(
+        'stocks', 5, ['United States', 'Europe', 'America', 'Asia', 'Australia']
+    )
     forex_extractor = TradingEconomicsSingleTableScraper('currencies', 0, 'Major')
 
     if settings.DEBUG_WEEKEND:
@@ -39,7 +42,8 @@ async def streamline_extractors():
     else:
         asyncio.gather(
             commodity_extractor.extract(),
-            forex_extractor.extract()
+            forex_extractor.extract(),
+            stock_extractor.extract()
         )
 
 

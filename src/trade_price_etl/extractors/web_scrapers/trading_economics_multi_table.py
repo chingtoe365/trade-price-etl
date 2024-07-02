@@ -71,7 +71,7 @@ class TradingEconomicsMultiTableScraper:
             # logger.debug(">> Getting into the loop")
             # driver.get(full_url)
             while True:
-                driver.get(full_url)
+                driver.execute_script("return document.body.innerHTML")
                 full_html = driver.page_source
                 try:
                     dfs = pd.read_html(full_html)

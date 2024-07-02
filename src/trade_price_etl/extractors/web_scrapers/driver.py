@@ -30,12 +30,21 @@ class SeleniumDriver(ContextDecorator):
             self._chrome_options.headless = headless
 
         self._chrome_options.add_argument('--no-sandbox')
+        self._chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        self._chrome_options.add_experimental_option('excludeSwitches', ["enable-automation"])
+        self._chrome_options.add_experimental_option('useAutomationExtension', False)
 
         self.driver = webdriver.Chrome(
             chrome_options=self._chrome_options,
             **self._kwargs
         )
-        # self.driver = webdriver.Firefox()
+        
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        self.driver.execute_cdp_cmd(
+            "Network.setUserAgentOverride", {
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+            }
+        )
         return self.driver
 
     def _get_kwargs(self):

@@ -1,7 +1,18 @@
 from contextlib import ContextDecorator
+import logging
+import random
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+PROXIES = [
+    "http://160.86.242.23:8080",
+    "http://172.183.241.1:8080",
+    "http://47.251.70.179:80",
+    "http://20.235.159.154:80"
+]
+
+logger = logging.getLogger(__name__)
 
 
 class SeleniumDriver(ContextDecorator):
@@ -33,6 +44,11 @@ class SeleniumDriver(ContextDecorator):
         self._chrome_options.add_argument('--disable-blink-features=AutomationControlled')
         self._chrome_options.add_experimental_option('excludeSwitches', ["enable-automation"])
         self._chrome_options.add_experimental_option('useAutomationExtension', False)
+
+        # randomly select a proxy
+        proxy = random.choice(PROXIES)
+        self._chrome_options.add_argument("--proxy-server=%s" % proxy)
+        logger.info("Proxy %s set for selenium" % proxy)
 
         self.driver = webdriver.Chrome(
             chrome_options=self._chrome_options,

@@ -1,29 +1,35 @@
 from contextlib import ContextDecorator
 import logging
 import random
+from typing import List
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-PROXIES = [
-    "http://160.86.242.23:8080",
-    "http://172.183.241.1:8080",
-    "http://47.251.70.179:80",
-    "http://20.235.159.154:80"
-]
 
 logger = logging.getLogger(__name__)
+
+
+def get_proxy_list() -> List[str]:
+    return [
+        "http://77.68.33.138:8080"
+        "http://160.86.242.23:8080",
+        "http://172.183.241.1:8080",
+        "http://47.251.70.179:80",
+        "http://20.235.159.154:80"
+    ]
 
 
 class SeleniumDriver(ContextDecorator):
     driver = None
 
     def __init__(
-        self, chrome_options=None, *args, **kwargs
+        self, first_attempt: bool=True, chrome_options=None, *args, **kwargs
     ):
         '''
         initialize Chrome webdriver
         '''
+        self._first_attempt = first_attempt
         self._chrome_options = chrome_options or Options()
         self._args = args
         self._kwargs = kwargs
@@ -45,10 +51,11 @@ class SeleniumDriver(ContextDecorator):
         self._chrome_options.add_experimental_option('excludeSwitches', ["enable-automation"])
         self._chrome_options.add_experimental_option('useAutomationExtension', False)
 
-        # randomly select a proxy
-        proxy = random.choice(PROXIES)
-        self._chrome_options.add_argument("--proxy-server=%s" % proxy)
-        logger.info("Proxy %s set for selenium" % proxy)
+        if not self._first_attempt:
+            # randomly select a proxy
+            proxy = random.choice(get_proxy_list())
+            self._chrome_options.add_argument("--proxy-server=%s" % proxy)
+            logger.info("Proxy %s set for selenium" % proxy)
 
         self.driver = webdriver.Chrome(
             chrome_options=self._chrome_options,
@@ -84,3 +91,5 @@ class SeleniumDriver(ContextDecorator):
         """
         if self.driver:
             self.__exit__()
+
+

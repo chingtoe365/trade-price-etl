@@ -39,9 +39,10 @@ class TradingEconomicsSingleTableScraper:
         # logger.info(settings.model_dump())
         # print("ok")
         logger.debug(">> Extracting price")
+        first_attempt = False
         while True:
             try:
-                with SeleniumDriver() as driver:
+                with SeleniumDriver(first_attempt=first_attempt) as driver:
                     driver.get(full_url)
                     full_html = driver.page_source
                     # df_old = pd.DataFrame()
@@ -97,5 +98,6 @@ class TradingEconomicsSingleTableScraper:
                             df_old = df.copy()
                         await asyncio.sleep(self._poll_frequency)
             except BadProxyException as bpe:
+                first_attempt = False
                 await asyncio.sleep(self._wait_for_blockade_unfrozen)
                 logger.warning("Rotating proxies...")

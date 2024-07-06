@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["jintaolong <longjintao59@gmail.com>"]
 readme = "README.md"
-packages = [{include = "trade_price_etl"}]
+#packages = [{include = "trade_price_etl"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -4,7 +4,7 @@ x-user: &user
 services:
   etl:
 #    <<: *user
-#    user: "8888:888"
+    user: "1000:1000"
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
@@ -15,6 +15,7 @@ services:
     command: /start.sh DEBUG
     volumes:
       - ../src/:/app
+      - ./:/tmp/docker:rw
 
   mqtt-broker:
 #    <<: *user

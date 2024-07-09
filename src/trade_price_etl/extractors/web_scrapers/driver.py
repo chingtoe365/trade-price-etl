@@ -1,11 +1,15 @@
-from contextlib import ContextDecorator
 import logging
 import random
-from typing import List
-
 import requests
+
+from contextlib import ContextDecorator
+from functools import wraps
+from typing import List
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import WebDriverException
+
+import pandas as pd
 
 
 logger = logging.getLogger(__name__)
@@ -20,23 +24,15 @@ def get_proxy_list() -> List[str]:
         "http://20.235.159.154:80"
     ]
     proxy_list_resp = requests.get(
-        "https://proxylist.geonode.com/api/proxy-list?protocols=http&limit=500&page=1&sort_by=speed&sort_type=asc",
+        # "https://proxylist.geonode.com/api/proxy-list?protocols=http&limit=500&page=1&sort_by=speed&sort_type=asc",
+        "https://free-proxy-list.net/",
         json={}
     )
     if proxy_list_resp.status_code == 200:
-        proxy_list_resp_json = proxy_list_resp.json()
-        if "data" in proxy_list_resp_json:
-            proxy_list = proxy_list_resp_json["data"]
-            if len(proxy_list) > 0:
-                # proxy = proxy_list[0]
-                available_proxy_list = [
-                    "http://%s:%s" % (proxy["ip"], str(proxy["port"]))
-                    for proxy in proxy_list
-                ]
+        proxy_tables = pd.read_html(proxy_list_resp.text)
+        if len(proxy_tables):
+            available_proxy_list = proxy_tables[0].apply(lambda x: f"http://{x['IP Address']}:{x['Port']}", axis=1).tolist()[:10]
     return available_proxy_list
-
-
-AVAILABLE_PROXIES = get_proxy_list()
 
 
 class SeleniumDriver(ContextDecorator):
@@ -72,7 +68,8 @@ class SeleniumDriver(ContextDecorator):
 
         if not self._first_attempt:
             # randomly select a proxy
-            proxy = random.choice(AVAILABLE_PROXIES)
+            proxy_list = get_proxy_list()
+            proxy = random.choice(proxy_list)
             self._chrome_options.add_argument("--proxy-server=%s" % proxy)
             logger.info("Proxy %s set for selenium" % proxy)
 
@@ -112,3 +109,23 @@ class SeleniumDriver(ContextDecorator):
             self.__exit__()
 
 
+
+class BadProxyException(Exception):
+    pass
+
+
+def on_table_not_found(async_extractor_func):
+    @wraps(async_extractor_func)
+    async def wrapped_func(*args, **kwargs):
+        first_attempt = False
+        while True:
+            try:
+                with SeleniumDriver(first_attempt=first_attempt) as driver:
+                    await async_extractor_func(driver=driver, *args, **kwargs),
+            except BadProxyException as bpe:
+                first_attempt = False
+                logger.warning("Bad proxy. Rotating proxies...")
+            except WebDriverException as wde:
+                first_attempt = False
+                logger.warning("Table not managed to be exracted. Rotating proxies...")
+    return wrapped_func

@@ -18,7 +18,7 @@ COPY ./pyproject.toml pyproject.toml
 COPY ./poetry.lock poetry.lock
 COPY ./README.md README.md
 
-RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.2 python3 -
+RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.8.3 python3 -
 
 ENV PATH=$HOME/.local/bin:$PATH
 

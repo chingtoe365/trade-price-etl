@@ -117,7 +117,7 @@ class BadProxyException(Exception):
 def on_table_not_found(async_extractor_func):
     @wraps(async_extractor_func)
     async def wrapped_func(*args, **kwargs):
-        first_attempt = False
+        first_attempt = True
         while True:
             try:
                 with SeleniumDriver(first_attempt=first_attempt) as driver:

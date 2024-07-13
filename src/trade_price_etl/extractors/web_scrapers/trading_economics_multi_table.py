@@ -9,6 +9,7 @@ import pandas as pd
 from urllib.parse import urljoin
 
 from trade_price_etl.extractors.web_scrapers.driver import BadProxyException, SeleniumDriver, on_table_not_found
+from trade_price_etl.notifications.redis import async_write_price
 from trade_price_etl.settings.base_settings import settings
 from trade_price_etl.storage.real_time_price import RTS
 
@@ -98,6 +99,9 @@ class TradingEconomicsMultiTableScraper:
                     price_name = df[self._name_cols[table_idx]][i]
                     new_price = df['Price'][i]
                     old_price = df_old['Price'][i]
+                    # cache in redis timeseries kv 
+                    await async_write_price(price_name, new_price)
+                    # REDIS_TS.add(price_name, datetime.datetime.now().timestamp(), float(new_price))
                     if new_price != old_price:
                         # logger.debug(f'>> {price_name} \n old: {old_price} \n new: {new_price}')
                         # store in storage

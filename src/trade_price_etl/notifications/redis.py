@@ -1,4 +1,11 @@
-"""Exploit timeseries DS in Redis to cache trade data"""
+"""Exploit timeseries DS in Redis to cache trade data
+
+***
+Implementation refer to
+https://redis.readthedocs.io/en/stable/examples.html
+***
+
+"""
 
 import redis.asyncio as redis
 

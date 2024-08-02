@@ -30,3 +30,10 @@ services:
     - 9001:9001
     networks:
       - service-net
+
+  redis:
+    image: redis
+    ports:
+    - 6379:6379
+    networks:
+      - service-net
